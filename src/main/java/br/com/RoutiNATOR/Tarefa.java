@@ -5,22 +5,33 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 public class Tarefa {
-
+/// OBJETO TA TAREFA
     private String nome;
     private String descricao;
     private boolean concluido;
     private int prioridade;
     private Instant dataDeCriacao;
 
+    @Override
+    public String toString() {
+        return "Tarefa{" +
+                "nome='" + nome + '\'' +
+                ", descricao='" + descricao + '\'' +
+                ", concluido=" + concluido +
+                ", prioridade=" + prioridade +
+                ", dataDeCriacao=" + dataDeCriacao +
+                '}';
+    }
+
     public Instant getDataDeCriacao() {
         return dataDeCriacao;
     }
 
 
-    public Tarefa(String nome, String descricao, boolean concluido, int prioridade) {
+    public Tarefa(String nome, String descricao, int prioridade) {
         this.nome = nome;
         this.descricao = descricao;
-        this.concluido = concluido;
+        this.concluido = false;
         this.prioridade = prioridade;
         this.dataDeCriacao = Instant.now();
     }
