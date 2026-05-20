@@ -14,13 +14,29 @@ public class Tarefa {
 
     @Override
     public String toString() {
-        return "Tarefa{" +
-                "nome='" + nome + '\'' +
-                ", descricao='" + descricao + '\'' +
-                ", concluido=" + concluido +
-                ", prioridade=" + prioridade +
-                ", dataDeCriacao=" + dataDeCriacao +
-                '}';
+        String status = concluido
+                ? Color.VERDE + "✅ CONCLUÍDA" + Color.RESET
+                : Color.VERMELHO + "❌ PENDENTE" + Color.RESET;
+
+        LocalDateTime dataFormatada = LocalDateTime.ofInstant(
+                dataDeCriacao,
+                ZoneId.systemDefault()
+        );
+
+        return """
+                                    %sDETALHES DA TAREFA
+                ##########################################################%s
+                Nome: %s
+                
+                Descrição: 
+                %s
+                
+                Status: %s
+                Prioridade: %d
+                
+                Criada em: %s
+                ##########################################################
+                """.formatted(Color.AZUL, Color.RESET,nome, descricao, status, prioridade, dataFormatada);
     }
 
     public Instant getDataDeCriacao() {

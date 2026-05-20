@@ -4,8 +4,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -21,11 +19,26 @@ public class RoutiNatorApplication implements CommandLineRunner {
     Map<String, Tarefa> tarefas = new HashMap<>(); // O HashMap que guarda as tarefas do usuario
 
 
+    public void uiMenu() {
+        System.out.flush();
+        System.out.println("""
+                  %s_____             _   _ _   _       _______ ____  _____ \s
+                 |  __ \\           | | (_) \\ | |   /\\|__   __/ __ \\|  __ \\\s
+                 | |__) |___  _   _| |_ _|  \\| |  /  \\  | | | |  | | |__) |
+                 |  _  // _ \\| | | | __| | . ` | / /\\ \\ | | | |  | |  _  /\s
+                 | | \\ \\ (_) | |_| | |_| | |\\  |/ ____ \\| | | |__| | | \\ \\\s
+                 |_|  \\_\\___/ \\__,_|\\__|_|_| \\_/_/    \\_\\_|  \\____/|_|  \\_\\
+                 ##########################################################%s
+                """.formatted(Color.AZUL, Color.RESET));
+    }
+
+
     /// CRIA TAREFA
     public void criaTarefa() {
 
         // PEDE DADOS AO USUÁRIO PARA CRIAÇÃO DE TAREFA
-        System.out.println("Digite o nome do tarefa: ");
+        System.out.println(Color.VERDE_BRIGHT + "CRIAÇÃO DE TAREFAS" + Color.RESET);
+        System.out.println("Digite o nome da tarefa: ");
         String nome = scanner.nextLine();
         System.out.println("Digite a descrição da tarefa: ");
         String descricao = scanner.nextLine();
@@ -41,7 +54,10 @@ public class RoutiNatorApplication implements CommandLineRunner {
 
     /// BUSCA TAREFA
     public String consultarTarefa(){
-        System.out.println(tarefas.keySet());
+        tarefas.forEach((nome, tarefa) -> {
+            System.out.println(nome + " - Concluido: " + tarefa.isConcluido());
+        });
+
         System.out.println("Digite a tarefa desejada");
         String tarefaInput = scanner.nextLine();
         Tarefa tarefaBuscada =  tarefas.get(tarefaInput);
@@ -86,8 +102,7 @@ public class RoutiNatorApplication implements CommandLineRunner {
         while(true){
 
             // MENU DO USUÁRIO
-            System.out.println("Bem vindo ao RoutiNATOR");
-            System.out.println("Seu organizador de tarefas super dahora");
+            uiMenu();
             System.out.println("""
                     1 - Adicionar Tarefas
                     2 - Consultar Tarefas
@@ -97,14 +112,18 @@ public class RoutiNatorApplication implements CommandLineRunner {
             int opcao = Integer.parseInt(scanner.nextLine());
 
 
+
             switch(opcao){
                 case 1:
+                    uiMenu();
                     criaTarefa();
                     break;
                 case 2:
+                    uiMenu();
                     menuConsulta(consultarTarefa());
                     break;
                 case 3:
+                    System.out.println(Color.VERMELHO + "Encerrando programa, obrigado por utilizar o RoutiNator" + Color.RESET);
                     return;
                 default:
                     System.out.println("Opção Inválida");
