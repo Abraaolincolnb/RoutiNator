@@ -3,6 +3,8 @@ package br.com.RoutiNATOR;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Tarefa {
 /// OBJETO TA TAREFA
@@ -11,6 +13,7 @@ public class Tarefa {
     private boolean concluido;
     private int prioridade;
     private Instant dataDeCriacao;
+    private List<String> tags = new ArrayList<>();
 
     @Override
     public String toString() {
@@ -35,8 +38,10 @@ public class Tarefa {
                 Prioridade: %d
                 
                 Criada em: %s
+                
+                Tags; %s
                 ##########################################################
-                """.formatted(Color.AZUL, Color.RESET,nome, descricao, status, prioridade, dataFormatada);
+                """.formatted(Color.AZUL, Color.RESET,nome, descricao, status, prioridade, dataFormatada, tags);
     }
 
     public Instant getDataDeCriacao() {
@@ -90,5 +95,21 @@ public class Tarefa {
                 dataDeCriacao,
                 ZoneId.systemDefault()
         );
+    }
+
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(String tag) {
+        tags.add(tag);
+    }
+
+    public void removeTags(String tag) {
+        tags.remove(tag);
+    }
+
+    public void alternarConclusao() {
+        this.concluido = !concluido;
     }
 }
