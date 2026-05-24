@@ -12,7 +12,7 @@ import java.util.Scanner;
 public class RoutiNatorApplication implements CommandLineRunner {
 
     public static void main(String[] args) {
-        SpringApplication.run(RoutiNatorApplication.class);
+        SpringApplication.run(RoutiNatorApplication.class);  /// pesquisar pq tem que colocar args aqui, e colocar args quando entender
     }
     /// INDEXAÇÃO DOS OBJETOS
     Scanner scanner = new Scanner(System.in); //o scanner utilizado em tudo
@@ -43,7 +43,8 @@ public class RoutiNatorApplication implements CommandLineRunner {
         System.out.println("Digite a descrição da tarefa: ");
         String descricao = scanner.nextLine();
         System.out.println("Digite a prioridade da tarefa sendo 0 o menos importante (apenas numeros inteiros): ");
-        int prioridade = Integer.parseInt(scanner.nextLine());
+        int prioridade = 0;
+        prioridade = Integer.parseInt(scanner.nextLine());
 
         Tarefa tarefa = new Tarefa(nome, descricao, prioridade);
 
@@ -55,7 +56,14 @@ public class RoutiNatorApplication implements CommandLineRunner {
     /// BUSCA TAREFA
     public String consultarTarefa(){
         tarefas.forEach((nome, tarefa) -> {
-            System.out.println(nome + " - Concluido: " + tarefa.isConcluido());
+            String status = tarefa.isConcluido()
+                    ? Color.VERDE + "✅ CONCLUÍDA" + Color.RESET
+                    : Color.VERMELHO + "❌ PENDENTE" + Color.RESET;
+            System.out.println("""
+                    %s 
+                    Status: %s
+                    -----------------------------
+                    """.formatted(nome, status));
         });
 
         System.out.println("Digite a tarefa desejada");
