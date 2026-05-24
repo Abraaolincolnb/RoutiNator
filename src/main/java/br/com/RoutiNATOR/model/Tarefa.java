@@ -1,4 +1,6 @@
-package br.com.RoutiNATOR;
+package br.com.RoutiNATOR.model;
+
+import br.com.RoutiNATOR.util.Color;
 
 import java.time.Instant;
 import java.time.LocalDateTime;

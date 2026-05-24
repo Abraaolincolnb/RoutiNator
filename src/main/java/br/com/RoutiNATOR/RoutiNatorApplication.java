@@ -1,5 +1,11 @@
 package br.com.RoutiNATOR;
 
+import br.com.RoutiNATOR.model.Tarefa;
+import br.com.RoutiNATOR.Repository.TarefaRepository;
+import br.com.RoutiNATOR.Repository.TagsRepository;
+import br.com.RoutiNATOR.util.Color;
+import br.com.RoutiNATOR.ui.MenuUI;
+import br.com.RoutiNATOR.util.MockData;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -13,23 +19,11 @@ public class RoutiNatorApplication implements CommandLineRunner {
         SpringApplication.run(RoutiNatorApplication.class);  /// pesquisar pq tem que colocar args aqui, e colocar args quando entender
     }
     /// INDEXAÇÃO DOS OBJETOS
+    TagsRepository tagsRepository = new TagsRepository();
+    TarefaRepository tarefaRepository = new TarefaRepository();
+    MenuUI MenuUI = new MenuUI();
     Scanner scanner = new Scanner(System.in); //o scanner utilizado em tudo
-    Map<String, Tarefa> tarefas = new HashMap<>(); // O HashMap que guarda as tarefas do usuario
-    Map<String, List<Tarefa>> tags = new HashMap<>();
-
-    public void uiMenu() {
-        System.out.flush();
-        System.out.println("""
-                  %s_____             _   _ _   _       _______ ____  _____ \s
-                 |  __ \\           | | (_) \\ | |   /\\|__   __/ __ \\|  __ \\\s
-                 | |__) |___  _   _| |_ _|  \\| |  /  \\  | | | |  | | |__) |
-                 |  _  // _ \\| | | | __| | . ` | / /\\ \\ | | | |  | |  _  /\s
-                 | | \\ \\ (_) | |_| | |_| | |\\  |/ ____ \\| | | |__| | | \\ \\\s
-                 |_|  \\_\\___/ \\__,_|\\__|_|_| \\_/_/    \\_\\_|  \\____/|_|  \\_\\
-                 ##########################################################%s
-                """.formatted(Color.AZUL, Color.RESET));
-    }
-
+    MockData MockData = new MockData(tarefaRepository, tagsRepository);
 
     /// CRIA TAREFA
     public void criaTarefa() {
@@ -40,7 +34,7 @@ public class RoutiNatorApplication implements CommandLineRunner {
         String nome = scanner.nextLine();
 
         // Volta ao menu principal se a tarefa já existe
-        if (tarefas.containsKey(nome)) {
+        if (tarefaRepository.exist(nome)) {
             System.out.println("Tarefa já existe! voltando ao menu principal...");
             return;
         }
@@ -54,7 +48,7 @@ public class RoutiNatorApplication implements CommandLineRunner {
         Tarefa tarefa = new Tarefa(nome, descricao, prioridade);
 
         // Adiciona tarefa no hashmap tarefas
-        tarefas.put(nome, tarefa);
+        tarefaRepository.put(tarefa);
     }
 
 
@@ -62,7 +56,7 @@ public class RoutiNatorApplication implements CommandLineRunner {
         public String consultarTarefa(){
 
         // Utiliza Foreach para imprimir cada tarefa com seu estado de conclusão
-        tarefas.forEach((nome, tarefa) -> {
+        tarefaRepository.listar().forEach(tarefa -> {
             String status = tarefa.isConcluido()
                     ? Color.VERDE + "✅ CONCLUÍDA" + Color.RESET
                     : Color.VERMELHO + "❌ PENDENTE" + Color.RESET;
@@ -70,13 +64,13 @@ public class RoutiNatorApplication implements CommandLineRunner {
                     %s 
                     Status: %s
                     -----------------------------
-                    """.formatted(nome, status));
+                    """.formatted(tarefa.getNome(), status));
         });
 
         // Pede ao usuário que digite uma tarefa para que seus atributos sejam imprimidos
         System.out.println("Digite a tarefa desejada");
         String tarefaInput = scanner.nextLine();
-        Tarefa tarefaBuscada = tarefas.get(tarefaInput);
+        Tarefa tarefaBuscada = tarefaRepository.get(tarefaInput);
         System.out.println(tarefaBuscada);
 
         return tarefaInput;
@@ -99,12 +93,8 @@ public class RoutiNatorApplication implements CommandLineRunner {
             case "2": // Remover tarefas
                 System.out.println("Certeza? Digite Y para confirmar, qualquer outra tecla para cancelar");
                 if (scanner.nextLine() .equals("Y")) {
-                    for (String s : tags.keySet()) {
-                        if (tags.get(s).contains(tarefas.get(tarefaInput))) {
-                            tags.get(s).remove(tarefas.get(tarefaInput));
-                        }
-                    }
-                    tarefas.remove(tarefaInput);
+                    tagsRepository.procurarERemover(tarefaInput);
+                    tarefaRepository.remove(tarefaInput);
                     System.out.println("tarefa removida com sucesso!");
                 } else {
                     System.out.println("Tarefa não foi deletada");
@@ -138,25 +128,24 @@ public class RoutiNatorApplication implements CommandLineRunner {
                 System.out.println("Digite o novo nome que deseja atribuir para a tarefa: ");
                 String novoNome = scanner.nextLine();
 
-                for (String s : tarefas.keySet()) { // Verifica se o nome já pertence a outra tarefa
-                    if (novoNome.equals(s)) {
+                if (tarefaRepository.exist(novoNome)){ // Verifica se o nome já pertence a outra tarefa
                         System.out.println("Este nome já pertence a outra tarefa! Voltando ao menu principal...");
                         return;
                     }
-                }
+
 
                 // Salva a tarefa enquanto é removida
                 // Depois altera o nome da tarefa salva e a adiciona de volta no hashmap de tarefas
-                Tarefa tarefa = tarefas.remove(tarefaInput);
+                Tarefa tarefa = tarefaRepository.remove(tarefaInput);
                 tarefa.setNome(novoNome);
-                tarefas.put(novoNome, tarefa);
+                tarefaRepository.put(tarefa);
 
                 System.out.println("Tarefa renomeada com sucesso!");
                 break;
 
             case "2": // Altera descrição
                 System.out.println("Digite a nova descrição para a tarefa: ");
-                tarefas.get(tarefaInput).setDescricao(scanner.nextLine());
+                tarefaRepository.get(tarefaInput).setDescricao(scanner.nextLine());
                 break;
 
             case "3": // Altera prioridade
@@ -176,14 +165,11 @@ public class RoutiNatorApplication implements CommandLineRunner {
                     System.out.println("Valor de prioridade menor que 0! Voltando ao menu principal...");
                     return;
                 }
-                tarefas.get(tarefaInput).setPrioridade(novaPrioridade);
+                tarefaRepository.get(tarefaInput).setPrioridade(novaPrioridade);
                 break;
 
             case "4": // Adiciona tags a uma tarefa e a mesma tarefa na lista da respectiva tag
-                // Imprime todas as tags para o usuário
-                for (String s : tags.keySet()) {
-                    System.out.println(s);
-                }
+                tagsRepository.ListarTags();
 
                 System.out.println("Digite o nome da tag que deseja adicionar a esta tarefa: ");
                 String tagParaAdicionar = scanner.nextLine();
@@ -191,18 +177,18 @@ public class RoutiNatorApplication implements CommandLineRunner {
                 // Primeiro verifica se a tag existe
                 // Depois verifica se a tarefa inserida já possui a tag desejada
                 // Volta ao menu principal se um dos dois gerarem resultado indesejado
-                if (!tags.containsKey(tagParaAdicionar)) {
+                if (!tagsRepository.containsKey(tagParaAdicionar)) {
                     System.out.println("Esta tag não existe! voltando ao menu principal...");
                     return;
                 }
-                if (tarefas.get(tarefaInput).getTags().contains(tagParaAdicionar)) {
+                if (tarefaRepository.get(tarefaInput).getTags().contains(tagParaAdicionar)) {
                     System.out.println("Esta tarefa já possui a tag exigida! Voltando ao menu principal...");
                     return;
                 }
 
                 // Adiciona tag na tarefa desejada e depois adiciona a tarefa na tag
-                tarefas.get(tarefaInput).setTags(tagParaAdicionar);
-                tags.get(tagParaAdicionar).add(tarefas.get(tarefaInput));
+                tarefaRepository.get(tarefaInput).setTags(tagParaAdicionar);
+                tagsRepository.get(tagParaAdicionar).add(tarefaRepository.get(tarefaInput));
                 System.out.println("Tag adicionada!");
                 break;
 
@@ -221,21 +207,21 @@ public class RoutiNatorApplication implements CommandLineRunner {
         String novaTag = scanner.nextLine();
 
         // Verifica se a tag já existe. Se sim, volta ao menu principal, senão ela é adicionada no hashmap tags
-        if (tags.containsKey(novaTag)) {
+        if (tagsRepository.containsKey(novaTag)) {
             System.out.println("Esta tag já existe! voltando ao menu principal...");
             return;
         }
-        tags.put(novaTag, new ArrayList<>());
+        tagsRepository.put(novaTag, new ArrayList<>());
         System.out.println("Tarefa adicionada com sucesso!");
 
         // Verifica se a lista de tarefas está vazia.
         // Se não estiver, mostra ao usuário a lista de tarefas
         // e pergunta ao usuário se deseja adicionar a tag recentemente criada a uma tarefa.
-        if (tarefas.isEmpty()) {
+        if (tarefaRepository.vazia()) {
             return;
         }
         System.out.println("Lista de tarefas: ");
-        for (String s : tarefas.keySet()) {
+        for (Tarefa s : tarefaRepository.listar()) {
             System.out.println(s);
         }
         System.out.println("""
@@ -250,14 +236,14 @@ public class RoutiNatorApplication implements CommandLineRunner {
                 String tarefaParaInserirTag = scanner.nextLine();
 
                 // Verifica se a tarefa exigida existe. Se não, retorna ao menu principal
-                if (!tarefas.containsKey(tarefaParaInserirTag)) {
+                if (!tarefaRepository.exist(tarefaParaInserirTag)) {
                     System.out.println("Tarefa não existe! Voltando ao menu principal...");
                     return;
                 }
 
                 // Adiciona a tag na tarefa e depois a tarefa na tag correspondente.
-                tarefas.get(tarefaParaInserirTag).setTags(novaTag);
-                tags.get(novaTag).add(tarefas.get(tarefaParaInserirTag));
+                tarefaRepository.get(tarefaParaInserirTag).setTags(novaTag);
+                tagsRepository.get(novaTag).add(tarefaRepository.get(tarefaParaInserirTag));
                 System.out.println("Tag adicionada para tarefa com sucesso!");
                 break;
 
@@ -272,22 +258,22 @@ public class RoutiNatorApplication implements CommandLineRunner {
 
     public void concluirTarefas() {
 
-        tarefas.forEach((nome, tarefa) -> {
-            System.out.println(nome + " - Concluido: " + tarefa.isConcluido());
+        tarefaRepository.listar().forEach(tarefa -> {
+            System.out.println(tarefa.getNome() + " - Concluido: " + tarefa.isConcluido());
         });
         System.out.println("Digite uma tarefa para alterar seu estado de conclusão: ");
-        tarefas.get(scanner.nextLine()).alternarConclusao();
+        tarefaRepository.get(scanner.nextLine()).alternarConclusao();
         System.out.println("Estado de conclusão alterado!");
     }
 
     /// COMEÇA PROGRAMA
     @Override
     public void run(String... args) throws Exception {
-        //MockData.popularDadosTeste(tarefas, tags); // Mock data pra testes
+        MockData.popularDadosTeste(); // Mock data pra testes
         while(true){
 
             // Menu do usuário
-            uiMenu();
+            MenuUI.logo();
             System.out.println("""
                     1 - Adicionar Tarefas
                     2 - Consultar Tarefas
@@ -297,11 +283,11 @@ public class RoutiNatorApplication implements CommandLineRunner {
 
             switch(scanner.nextLine()){
                 case "1":
-                    uiMenu();
+                    MenuUI.logo();
                     criaTarefa();
                     break;
                 case "2":
-                    uiMenu();
+                    MenuUI.logo();
                     menuConsulta(consultarTarefa());
                     break;
                 case "3":

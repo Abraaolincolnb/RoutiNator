@@ -1,15 +1,26 @@
-package br.com.RoutiNATOR;
+package br.com.RoutiNATOR.util;
+
+import br.com.RoutiNATOR.Repository.TagsRepository;
+import br.com.RoutiNATOR.Repository.TarefaRepository;
+import br.com.RoutiNATOR.model.Tarefa;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 public class MockData {
 
-    public static void popularDadosTeste(
-            Map<String, Tarefa> tarefas,
-            Map<String, List<Tarefa>> tags
+    private final TarefaRepository tarefasRepository;
+    private final TagsRepository tags;
+
+    public MockData(
+            TarefaRepository tarefasRepository,
+            TagsRepository tags
     ) {
+        this.tarefasRepository = tarefasRepository;
+        this.tags = tags;
+    }
+
+    public void popularDadosTeste()
+    {
 
         // =========================
         // CRIAÇÃO DAS TAGS
@@ -17,7 +28,7 @@ public class MockData {
 
         tags.put("estudos", new ArrayList<>());
         tags.put("trabalho", new ArrayList<>());
-        tags.put("saude", new ArrayList<>());
+        tags.put("saúde", new ArrayList<>());
         tags.put("projeto", new ArrayList<>());
         tags.put("urgente", new ArrayList<>());
 
@@ -63,11 +74,11 @@ public class MockData {
         // ADICIONA NO HASHMAP
         // =========================
 
-        tarefas.put(t1.getNome(), t1);
-        tarefas.put(t2.getNome(), t2);
-        tarefas.put(t3.getNome(), t3);
-        tarefas.put(t4.getNome(), t4);
-        tarefas.put(t5.getNome(), t5);
+        tarefasRepository.put(t1);
+        tarefasRepository.put(t2);
+        tarefasRepository.put(t3);
+        tarefasRepository.put(t4);
+        tarefasRepository.put(t5);
 
 
 
@@ -77,7 +88,7 @@ public class MockData {
 
         t1.setTags("estudos");
 
-        t2.setTags("saude");
+        t2.setTags("saúde");
 
         t3.setTags("projeto");
         t3.setTags("estudos");
@@ -96,7 +107,7 @@ public class MockData {
         tags.get("estudos").add(t1);
         tags.get("estudos").add(t3);
 
-        tags.get("saude").add(t2);
+        tags.get("saúde").add(t2);
 
         tags.get("projeto").add(t3);
 

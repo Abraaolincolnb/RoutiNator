@@ -1,4 +1,4 @@
-package br.com.RoutiNATOR;
+package br.com.RoutiNATOR.util;
 
 public class Color {
     // RESET
